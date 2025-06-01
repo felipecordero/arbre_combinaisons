@@ -3,7 +3,10 @@ import pandas as pd
 import networkx as nx
 import matplotlib.pyplot as plt
 import numpy as np
+import seaborn as sns
 from translations import LANGUAGES
+from styles import CUSTOM_CSS
+
 
 # Set default theme to light
 st.set_page_config(
@@ -18,53 +21,14 @@ st.set_page_config(
     }
 )
 
-# Custom CSS for kid-friendly styling
-st.markdown("""
-    <style>
-    .stButton>button {
-        background-color: #4CAF50;
-        color: white;
-        border-radius: 20px;
-        padding: 10px 20px;
-        font-size: 18px;
-    }
-    .stTextInput>div>div>input {
-        border-radius: 10px;
-        border: 2px solid #4CAF50;
-    }
-    .stSelectbox>div>div>select {
-        border-radius: 10px;
-        border: 2px solid #4CAF50;
-    }
-    h1 {
-        color: #2E7D32;
-        font-size: 3em !important;
-        text-align: center;
-        padding: 20px;
-    }
-    h2 {
-        color: #388E3C;
-        font-size: 2em !important;
-        padding: 15px;
-    }
-    h3 {
-        color: #43A047;
-        font-size: 1.5em !important;
-        padding: 10px;
-    }
-    /* Make metric labels larger */
-    .stMetric label {
-        font-size: 1.2em !important;
-        font-weight: bold !important;
-    }
-    /* Style the metric container */
-    .stMetric {
-        padding: 10px;
-        border-radius: 10px;
-        background-color: #E8F5E9;
-    }
-    </style>
-    """, unsafe_allow_html=True)
+
+# Apply custom CSS
+st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
+
+# Set seaborn style - using white background without grid
+sns.set_theme(style="white", context="notebook", font_scale=1.2)
+sns.set_palette("husl")  # Use seaborn's color palette
+
 
 # Language selector in sidebar with emoji
 selected_language = st.sidebar.selectbox(
@@ -144,13 +108,22 @@ with col_tree:
             G.add_node(f"{selected_initial}-{p2}-{f}", level=2)
             G.add_edge(f"{selected_initial}-{p2}", f"{selected_initial}-{p2}-{f}")
 
-    # Create the visualization with a more colorful style
-    plt.figure(figsize=(15, 10))  # Adjusted size for column
-    plt.style.use('default')  # Use default style as base
-
+    # Create the visualization with seaborn styling
+    plt.figure(figsize=(15, 10))
+    
     # Set a light background
     plt.rcParams['figure.facecolor'] = '#f0f2f6'
     plt.rcParams['axes.facecolor'] = '#f0f2f6'
+
+    # Use seaborn's color palette for nodes
+    node_colors = []
+    for node in G.nodes():
+        if G.nodes[node]['level'] == 0:
+            node_colors.append(sns.color_palette("husl", 3)[0])  # First color
+        elif G.nodes[node]['level'] == 1:
+            node_colors.append(sns.color_palette("husl", 3)[1])  # Second color
+        else:
+            node_colors.append(sns.color_palette("husl", 3)[2])  # Third color
 
     # Create hierarchical layout
     pos = {}
@@ -168,19 +141,9 @@ with col_tree:
             y_pos = (i - (len(pos_2)-1)/2) * 3 + (j - (len(fin)-1)/2) * 0.8
             pos[f"{selected_initial}-{p2}-{f}"] = np.array([8, y_pos])
 
-    # Draw nodes with more vibrant colors
-    node_colors = []
-    for node in G.nodes():
-        if G.nodes[node]['level'] == 0:
-            node_colors.append('#4CAF50')  # Green
-        elif G.nodes[node]['level'] == 1:
-            node_colors.append('#2196F3')  # Blue
-        else:
-            node_colors.append('#FF9800')  # Orange
-
     # Draw nodes with larger size and better styling
     nx.draw_networkx_nodes(G, pos, node_color=node_colors, 
-                          node_size=4000, alpha=0.8,  # Slightly smaller nodes
+                          node_size=4000, alpha=0.8,
                           edgecolors='white', linewidths=2)
 
     # Draw edges with better styling
@@ -192,8 +155,9 @@ with col_tree:
     nx.draw_networkx_labels(G, pos, font_size=18, font_weight='bold',
                            font_color='white')
 
-    # Remove axis
+    # Remove axis and any remaining grid lines
     plt.axis('off')
+    plt.grid(False)
 
     plt.title(f"🌳 Tree Structure for Initial Point {selected_initial} 🌳", 
              fontsize=20, pad=20, color='#2E7D32')
@@ -210,8 +174,12 @@ with col_tree:
 st.header(f"📈 {t['statistics']}")
 col1, col2 = st.columns(2)
 with col1:
-    st.metric(f"🔢 {t['total_combinations']}", len(df))
-    st.metric(f"🎯 {t['unique_initial']}", len(partidas))
+    st.subheader(f"🔢 {t['total_combinations']}")
+    st.write(f"## {len(df)}")
+    st.subheader(f"🎯 {t['unique_initial']}")
+    st.write(f"## {len(partidas)}")
 with col2:
-    st.metric(f"🔤 {t['second_options']}", len(pos_2))
-    st.metric(f"🎯 {t['final_options']}", len(fin)) 
+    st.subheader(f"🔤 {t['second_options']}")
+    st.write(f"## {len(pos_2)}")
+    st.subheader(f"🎯 {t['final_options']}")
+    st.write(f"## {len(fin)}") 
