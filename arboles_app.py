@@ -108,100 +108,105 @@ for inicio in partidas:
 # Convert to DataFrame
 df = pd.DataFrame(results)
 
-# Display the results with emoji
-st.header(f"📊 {t['combinations_header']}")
-st.dataframe(df.style.set_properties(**{
-    'background-color': '#E8F5E9',
-    'color': '#1B5E20',
-    'border': '1px solid #A5D6A7'
-}))
+# Create two columns for the main content
+col_table, col_tree = st.columns([1, 1])
 
-# Tree visualization with emoji
-st.header(f"🎨 {t['tree_visualization']}")
+# Display the results with emoji in the left column
+with col_table:
+    st.header(f"📊 {t['combinations_header']}")
+    st.dataframe(df.style.set_properties(**{
+        'background-color': '#E8F5E9',
+        'color': '#1B5E20',
+        'border': '1px solid #A5D6A7'
+    }))
 
-# Select initial point for visualization with emoji
-selected_initial = st.selectbox(
-    f"🎯 {t['select_initial']}",
-    options=partidas
-)
+# Tree visualization with emoji in the right column
+with col_tree:
+    st.header(f"🎨 {t['tree_visualization']}")
 
-# Create a graph for the selected initial point
-G = nx.DiGraph()
+    # Select initial point for visualization with emoji
+    selected_initial = st.selectbox(
+        f"🎯 {t['select_initial']}",
+        options=partidas
+    )
 
-# Add nodes and edges for the selected initial point
-G.add_node(str(selected_initial), level=0)
+    # Create a graph for the selected initial point
+    G = nx.DiGraph()
 
-for p2 in pos_2:
-    G.add_node(f"{selected_initial}-{p2}", level=1)
-    G.add_edge(str(selected_initial), f"{selected_initial}-{p2}")
-    
-    for f in fin:
-        G.add_node(f"{selected_initial}-{p2}-{f}", level=2)
-        G.add_edge(f"{selected_initial}-{p2}", f"{selected_initial}-{p2}-{f}")
+    # Add nodes and edges for the selected initial point
+    G.add_node(str(selected_initial), level=0)
 
-# Create the visualization with a more colorful style
-plt.figure(figsize=(20, 10))
-plt.style.use('default')  # Use default style as base
+    for p2 in pos_2:
+        G.add_node(f"{selected_initial}-{p2}", level=1)
+        G.add_edge(str(selected_initial), f"{selected_initial}-{p2}")
+        
+        for f in fin:
+            G.add_node(f"{selected_initial}-{p2}-{f}", level=2)
+            G.add_edge(f"{selected_initial}-{p2}", f"{selected_initial}-{p2}-{f}")
 
-# Set a light background
-plt.rcParams['figure.facecolor'] = '#f0f2f6'
-plt.rcParams['axes.facecolor'] = '#f0f2f6'
+    # Create the visualization with a more colorful style
+    plt.figure(figsize=(15, 10))  # Adjusted size for column
+    plt.style.use('default')  # Use default style as base
 
-# Create hierarchical layout
-pos = {}
-# Position initial node
-pos[str(selected_initial)] = np.array([0, 0])
+    # Set a light background
+    plt.rcParams['figure.facecolor'] = '#f0f2f6'
+    plt.rcParams['axes.facecolor'] = '#f0f2f6'
 
-# Position second level nodes
-for i, p2 in enumerate(pos_2):
-    y_pos = (i - (len(pos_2)-1)/2) * 3
-    pos[f"{selected_initial}-{p2}"] = np.array([4, y_pos])
+    # Create hierarchical layout
+    pos = {}
+    # Position initial node
+    pos[str(selected_initial)] = np.array([0, 0])
 
-# Position final level nodes
-for i, p2 in enumerate(pos_2):
-    for j, f in enumerate(fin):
-        y_pos = (i - (len(pos_2)-1)/2) * 3 + (j - (len(fin)-1)/2) * 0.8
-        pos[f"{selected_initial}-{p2}-{f}"] = np.array([8, y_pos])
+    # Position second level nodes
+    for i, p2 in enumerate(pos_2):
+        y_pos = (i - (len(pos_2)-1)/2) * 3
+        pos[f"{selected_initial}-{p2}"] = np.array([4, y_pos])
 
-# Draw nodes with more vibrant colors
-node_colors = []
-for node in G.nodes():
-    if G.nodes[node]['level'] == 0:
-        node_colors.append('#4CAF50')  # Green
-    elif G.nodes[node]['level'] == 1:
-        node_colors.append('#2196F3')  # Blue
-    else:
-        node_colors.append('#FF9800')  # Orange
+    # Position final level nodes
+    for i, p2 in enumerate(pos_2):
+        for j, f in enumerate(fin):
+            y_pos = (i - (len(pos_2)-1)/2) * 3 + (j - (len(fin)-1)/2) * 0.8
+            pos[f"{selected_initial}-{p2}-{f}"] = np.array([8, y_pos])
 
-# Draw nodes with larger size and better styling
-nx.draw_networkx_nodes(G, pos, node_color=node_colors, 
-                      node_size=5000, alpha=0.8,
-                      edgecolors='white', linewidths=2)
+    # Draw nodes with more vibrant colors
+    node_colors = []
+    for node in G.nodes():
+        if G.nodes[node]['level'] == 0:
+            node_colors.append('#4CAF50')  # Green
+        elif G.nodes[node]['level'] == 1:
+            node_colors.append('#2196F3')  # Blue
+        else:
+            node_colors.append('#FF9800')  # Orange
 
-# Draw edges with better styling
-nx.draw_networkx_edges(G, pos, edge_color='#757575', 
-                      arrows=True, arrowsize=30, width=3,
-                      alpha=0.6)
+    # Draw nodes with larger size and better styling
+    nx.draw_networkx_nodes(G, pos, node_color=node_colors, 
+                          node_size=4000, alpha=0.8,  # Slightly smaller nodes
+                          edgecolors='white', linewidths=2)
 
-# Draw labels with better styling
-nx.draw_networkx_labels(G, pos, font_size=20, font_weight='bold',
-                       font_color='white')
+    # Draw edges with better styling
+    nx.draw_networkx_edges(G, pos, edge_color='#757575', 
+                          arrows=True, arrowsize=30, width=3,
+                          alpha=0.6)
 
-# Remove axis
-plt.axis('off')
+    # Draw labels with better styling
+    nx.draw_networkx_labels(G, pos, font_size=18, font_weight='bold',
+                           font_color='white')
 
-plt.title(f"🌳 Tree Structure for Initial Point {selected_initial} 🌳", 
-         fontsize=24, pad=20, color='#2E7D32')
+    # Remove axis
+    plt.axis('off')
 
-# Add level labels with better styling
-plt.text(-1, 0, f"🌱 {t['initial_label']}", fontsize=20, fontweight='bold', color='#2E7D32')
-plt.text(2, 0, f"🌿 {t['second_label']}", fontsize=20, fontweight='bold', color='#1565C0')
-plt.text(6, 0, f"🍃 {t['final_label']}", fontsize=20, fontweight='bold', color='#E65100')
+    plt.title(f"🌳 Tree Structure for Initial Point {selected_initial} 🌳", 
+             fontsize=20, pad=20, color='#2E7D32')
 
-# Display the plot in Streamlit
-st.pyplot(plt)
+    # Add level labels with better styling
+    plt.text(-1, 0, f"🌱 {t['initial_label']}", fontsize=18, fontweight='bold', color='#2E7D32')
+    plt.text(2, 0, f"🌿 {t['second_label']}", fontsize=18, fontweight='bold', color='#1565C0')
+    plt.text(6, 0, f"🍃 {t['final_label']}", fontsize=18, fontweight='bold', color='#E65100')
 
-# Add statistics with emojis
+    # Display the plot in Streamlit
+    st.pyplot(plt)
+
+# Add statistics with emojis below both columns
 st.header(f"📈 {t['statistics']}")
 col1, col2 = st.columns(2)
 with col1:
