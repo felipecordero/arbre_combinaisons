@@ -106,10 +106,10 @@ nx.draw_networkx_labels(G, pos, font_size=18, font_weight='bold')
 
 plt.title(f"Tree Structure for Initial Point {selected_initial}", fontsize=24, pad=20)
 
-# Add level labels with larger font
+# Add level labels with larger font and adjusted positions
 plt.text(-1, 0, "Initial", fontsize=20, fontweight='bold')
-plt.text(3, 0, "Second Level", fontsize=20, fontweight='bold')
-plt.text(7, 0, "Final Level", fontsize=20, fontweight='bold')
+plt.text(2, 0, "Second Level", fontsize=20, fontweight='bold')
+plt.text(6, 0, "Final Level", fontsize=20, fontweight='bold')
 
 # Display the plot in Streamlit
 st.pyplot(plt)
