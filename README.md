@@ -14,10 +14,10 @@ Hey there! 👋 This is a fun app that helps you create and explore tree-like st
 1. First, let's get the app on your computer! 💻
    ```bash
    # Download the app
-   git clone <repository-url>
+   git clone git@github.com:felipecordero/arbre_combinaisons.git
 
    # Go to the app folder
-   cd <project-directory>
+   cd arbre_combinaisons
    ```
 
 2. Set up your magic environment! ✨
